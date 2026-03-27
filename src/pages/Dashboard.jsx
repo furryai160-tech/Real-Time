@@ -93,6 +93,7 @@ const Dashboard = () => {
   const [title, setTitle]         = useState('');
   const [url, setUrl]             = useState('');
   const [detectedPlatform, setDetectedPlatform] = useState(null);
+  const [customThumb, setCustomThumb]           = useState('');
   const [category, setCategory]   = useState(CATEGORIES[0]);
   const [platforms, setPlatforms] = useState([]);
 
@@ -160,12 +161,12 @@ const Dashboard = () => {
         originalUrl: url,
         isDrive: info.platform === 'drive',
         platform: info.platform,
-        thumbUrl: info.thumbUrl || null,   // ← save thumbnail URL
+        thumbUrl: customThumb.trim() || info.thumbUrl || null,
         category,
         platforms,
         createdAt: serverTimestamp()
       });
-      setTitle(''); setUrl(''); setPlatforms([]); setDetectedPlatform(null);
+      setTitle(''); setUrl(''); setCustomThumb(''); setPlatforms([]); setDetectedPlatform(null);
       await fetchVideos();
       notify('success', 'تم رفع الفيديو بنجاح ✓');
     } catch (e) {
@@ -286,6 +287,39 @@ const Dashboard = () => {
               />
               <span className="url-hint eng-font">
                 📎 يمكنك لصق رابط من أي منصة — هيتحوّل تلقائياً
+              </span>
+            </div>
+
+            {/* ── Custom thumbnail field ── */}
+            <div className="form-group">
+              <div className="url-label-row">
+                <label>🖼️ صورة الغلاف (اختياري)</label>
+                {customThumb && <span className="drive-detected">✅ صورة جاهزة</span>}
+              </div>
+              <input
+                type="text"
+                value={customThumb}
+                onChange={e => setCustomThumb(e.target.value)}
+                placeholder="الصق رابط صورة PNG/JPG من أي مكان..."
+                className="eng-font"
+              />
+              {customThumb && (
+                <div className="thumb-preview-wrap">
+                  <img
+                    src={customThumb}
+                    alt="preview"
+                    className="thumb-preview-img"
+                    onError={(e) => { e.target.style.opacity = '0.2'; }}
+                  />
+                  <button
+                    type="button"
+                    className="thumb-clear-btn"
+                    onClick={() => setCustomThumb('')}
+                  >✕ حذف</button>
+                </div>
+              )}
+              <span className="url-hint eng-font">
+                💡 خد screenshot من TikTok / Instagram والصق رابطه هنا — أو ارفع الصورة على Imgur/ImgBB وخد رابطها
               </span>
             </div>
 
