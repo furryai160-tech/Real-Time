@@ -20,6 +20,29 @@ const getDrivePreviewUrl = (url) => {
   return url;
 };
 
+/* Google Drive thumbnail image (works publicly if file is shared) */
+const getDriveThumbnail = (url) => {
+  const match = url.match(/\/d\/([\w-]+)\//);
+  if (match) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w600`;
+  return null;
+};
+
+/* Video thumbnail using first frame */
+const VideoThumb = ({ src }) => {
+  const ref = React.useRef(null);
+  return (
+    <video
+      ref={ref}
+      src={src}
+      className="v-thumb"
+      muted
+      playsInline
+      preload="metadata"
+      onLoadedMetadata={(e) => { e.target.currentTime = 0.5; }}
+    />
+  );
+};
+
 /* ──────────────────────────────
    Video Modal (fullscreen overlay)
 ────────────────────────────── */
@@ -100,23 +123,21 @@ const VideoCard = ({ video, idx, onPlay }) => (
   >
     <button className="v-card-btn" onClick={() => onPlay(video)}>
       <div className="v-media-wrap">
-        {/* Thumbnail */}
-        {!video.isDrive && (
-          <video
-            src={video.url}
+        {/* Thumbnail layer */}
+        {video.isDrive ? (
+          /* Drive thumbnail via Google API */
+          <img
+            src={getDriveThumbnail(video.url)}
+            alt={video.title}
             className="v-thumb"
-            muted
-            playsInline
-            preload="metadata"
+            onError={(e) => { e.target.style.display = 'none'; }}
           />
+        ) : (
+          /* MP4 first frame */
+          <VideoThumb src={video.url} />
         )}
-        {/* Drive dark cover */}
-        {video.isDrive && (
-          <div className="v-drive-cover">
-            <span className="drive-label eng-font">G Drive</span>
-          </div>
-        )}
-        {/* Play button overlay */}
+
+        {/* Play button overlay (shows on hover) */}
         <div className="v-overlay">
           <div className="v-play-btn">
             <Play size={26} fill="#fff" />

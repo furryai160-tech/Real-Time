@@ -190,15 +190,15 @@
               0 0 0 26px rgba(255,106,0,0.09);
 }
 
-/* Thumbnail video in cover mode */
+/* Thumbnail — img or video  */
 .v-thumb {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.45;
   pointer-events: none;
+  display: block;
 }
 
 /* Play button circle */
