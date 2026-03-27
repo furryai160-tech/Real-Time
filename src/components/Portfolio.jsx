@@ -72,14 +72,24 @@ const Portfolio = () => {
                   className="video-card glass-card"
                 >
                   <div className="video-wrapper">
-                    <video 
-                      src={video.url} 
-                      muted 
-                      loop 
-                      playsInline 
-                      autoPlay
-                      className="portfolio-video"
-                    ></video>
+                    {video.isDrive ? (
+                      <iframe
+                        src={video.url}
+                        className="portfolio-video"
+                        allow="autoplay"
+                        allowFullScreen
+                        title={video.title}
+                      />
+                    ) : (
+                      <video
+                        src={video.url}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        className="portfolio-video"
+                      />
+                    )}
                     <div className="video-overlay">
                       <Play fill="#fff" size={40} className="play-icon" />
                     </div>

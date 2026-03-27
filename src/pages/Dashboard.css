@@ -373,6 +373,47 @@
   background: #111;
 }
 
+/* ── URL field extras ── */
+.url-label-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.drive-detected {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4ade80;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.2);
+  border-radius: 6px;
+  padding: 3px 10px;
+  animation: fadeInDown 0.3s ease;
+}
+
+.url-hint {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.25);
+  margin-top: 6px;
+  display: block;
+}
+
+/* Drive badge in table */
+.drive-badge {
+  display: inline-block;
+  background: rgba(66,133,244,0.12);
+  color: #4285f4;
+  border: 1px solid rgba(66,133,244,0.25);
+  border-radius: 5px;
+  padding: 1px 7px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-right: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
 /* Platforms */
 .platforms-row {
   display: flex;

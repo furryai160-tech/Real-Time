@@ -7,6 +7,23 @@ import { FaWhatsapp, FaInstagram, FaTiktok, FaFacebookF, FaYoutube } from 'react
 import { LogOut, Film, Trash2, Plus, LayoutDashboard, Video, AlertCircle } from 'lucide-react';
 import './Dashboard.css';
 
+/* ─── Google Drive helper ─── */
+// Accepts share link like: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+// Returns embed URL:        https://drive.google.com/file/d/FILE_ID/preview
+const DRIVE_REGEX = /drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/;
+
+export function convertDriveLink(input) {
+  const match = input.match(DRIVE_REGEX);
+  if (match) {
+    return { embed: `https://drive.google.com/file/d/${match[1]}/preview`, isDrive: true };
+  }
+  return { embed: input, isDrive: false };
+}
+
+export function isDriveUrl(url = '') {
+  return DRIVE_REGEX.test(url);
+}
+
 const ADMIN_PASS = 'rt2024admin';
 
 const CATEGORIES = ['Medical', 'Real Estate', 'Restaurants', 'Events', 'Ads'];
@@ -77,10 +94,17 @@ const Dashboard = () => {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('rt_admin') === '1');
 
   // Form state
-  const [title, setTitle]       = useState('');
-  const [url, setUrl]           = useState('');
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [title, setTitle]         = useState('');
+  const [url, setUrl]             = useState('');
+  const [isDrive, setIsDrive]     = useState(false);
+  const [category, setCategory]   = useState(CATEGORIES[0]);
   const [platforms, setPlatforms] = useState([]);
+
+  const handleUrlChange = (e) => {
+    const val = e.target.value;
+    setUrl(val);
+    setIsDrive(DRIVE_REGEX.test(val));
+  };
 
   // Data state
   const [videos, setVideos]     = useState([]);
@@ -128,11 +152,17 @@ const Dashboard = () => {
     if (!title.trim() || !url.trim()) return notify('error', 'الرجاء ملء العنوان والرابط');
     setSaving(true);
     try {
+      const { embed, isDrive: driveFlag } = convertDriveLink(url);
       await addDoc(collection(db, 'videos'), {
-        title, url, category, platforms,
+        title,
+        url: embed,          // store the embed-ready URL
+        originalUrl: url,    // keep the original for reference
+        isDrive: driveFlag,
+        category,
+        platforms,
         createdAt: serverTimestamp()
       });
-      setTitle(''); setUrl(''); setPlatforms([]);
+      setTitle(''); setUrl(''); setPlatforms([]); setIsDrive(false);
       await fetchVideos();
       notify('success', 'تم رفع الفيديو بنجاح ✓');
     } catch (e) {
@@ -236,14 +266,20 @@ const Dashboard = () => {
             </div>
 
             <div className="form-group">
-              <label>رابط الفيديو (Direct URL)</label>
+              <div className="url-label-row">
+                <label>رابط الفيديو</label>
+                {isDrive && <span className="drive-detected">✅ Google Drive تم اكتشافه</span>}
+              </div>
               <input
-                type="url"
+                type="text"
                 value={url}
-                onChange={e => setUrl(e.target.value)}
-                placeholder="https://example.com/video.mp4"
+                onChange={handleUrlChange}
+                placeholder="رابط مباشر أو رابط Google Drive (share link)"
                 className="eng-font"
               />
+              <span className="url-hint eng-font">
+                📎 يمكنك لصق رابط مشاركة Drive مباشرة — هيتحوّل تلقائياً
+              </span>
             </div>
 
             <div className="form-group">
@@ -294,7 +330,10 @@ const Dashboard = () => {
               </div>
               {filtered.map((v) => (
                 <div key={v.id} className="table-row">
-                  <span className="row-title">{v.title}</span>
+                  <span className="row-title">
+                    {v.title}
+                    {v.isDrive && <span className="drive-badge eng-font">Drive</span>}
+                  </span>
                   <span className="eng-font row-cat">{v.category}</span>
                   <span className="row-platforms">
                     {(v.platforms || []).map(pid => {
