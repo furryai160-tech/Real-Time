@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, ExternalLink } from 'lucide-react';
+import { Play, X } from 'lucide-react';
 import './Portfolio.css';
 
 const categories = ['All', 'Medical', 'Real Estate', 'Restaurants', 'Events', 'Ads'];
@@ -13,77 +13,132 @@ const DEMO_VIDEOS = [
   { id: 'demo3', title: 'عقارات فاخرة', category: 'Real Estate', isDrive: false, url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
 ];
 
-/* ── Extract Drive file ID to build watch URL ── */
-const getDriveWatchUrl = (embedUrl) => {
-  const match = embedUrl.match(/\/d\/([\w-]+)\//);
-  if (match) return `https://drive.google.com/file/d/${match[1]}/view`;
-  return embedUrl;
+/* Extract FILE_ID and return preview URL */
+const getDrivePreviewUrl = (url) => {
+  const match = url.match(/\/d\/([\w-]+)\//);
+  if (match) return `https://drive.google.com/file/d/${match[1]}/preview`;
+  return url;
 };
 
-/* Click-to-play video card */
-const VideoCard = ({ video, idx }) => {
-  const [playing, setPlaying] = useState(false);
+/* ──────────────────────────────
+   Video Modal (fullscreen overlay)
+────────────────────────────── */
+const VideoModal = ({ video, onClose }) => {
+  // Close on Escape key
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
 
   return (
-    <motion.div
-      key={video.id}
-      className="v-card"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ delay: idx * 0.07, duration: 0.4 }}
-    >
-      <div className="v-media-wrap">
-        {/* ── Drive → open in new tab ── */}
-        {video.isDrive ? (
-          <a
-            href={getDriveWatchUrl(video.url)}
-            target="_blank"
-            rel="noreferrer"
-            className="v-cover v-cover--drive"
-          >
-            <div className="v-play-btn"><Play size={28} fill="#fff" /></div>
-            <span className="v-play-label">🎬 اضغط لمشاهدة الفيديو</span>
-          </a>
-        ) : (
-          /* ── Direct MP4 ── */
-          !playing ? (
-            <button className="v-cover" onClick={() => setPlaying(true)}>
-              <video src={video.url} className="v-thumb" muted playsInline preload="metadata" />
-              <div className="v-play-btn"><Play size={28} fill="#fff" /></div>
-            </button>
-          ) : (
-            <video
-              src={video.url}
-              className="v-iframe"
-              autoPlay
-              controls
-              playsInline
-            />
-          )
-        )}
-      </div>
-
-      {/* Bottom info */}
-      <div className="v-info">
-        <span className="v-title">{video.title}</span>
-        <a
-          href={video.isDrive ? getDriveWatchUrl(video.url) : video.url}
-          target="_blank"
-          rel="noreferrer"
-          className="v-link"
+    <AnimatePresence>
+      <motion.div
+        className="modal-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div
+          className="modal-player"
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.85, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <ExternalLink size={14} />
-        </a>
-      </div>
-    </motion.div>
+          {/* Close button */}
+          <button className="modal-close" onClick={onClose}>
+            <X size={22} />
+          </button>
+
+          {/* Title */}
+          <div className="modal-title">{video.title}</div>
+
+          {/* Player */}
+          <div className="modal-media">
+            {video.isDrive ? (
+              <iframe
+                src={getDrivePreviewUrl(video.url)}
+                className="modal-iframe"
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                title={video.title}
+              />
+            ) : (
+              <video
+                src={video.url}
+                className="modal-video"
+                autoPlay
+                controls
+                playsInline
+              />
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
+/* ──────────────────────────────
+   Video Card (thumbnail)
+────────────────────────────── */
+const VideoCard = ({ video, idx, onPlay }) => (
+  <motion.div
+    className="v-card"
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, scale: 0.9 }}
+    transition={{ delay: idx * 0.07, duration: 0.4 }}
+    whileHover={{ y: -5 }}
+  >
+    <button className="v-card-btn" onClick={() => onPlay(video)}>
+      <div className="v-media-wrap">
+        {/* Thumbnail */}
+        {!video.isDrive && (
+          <video
+            src={video.url}
+            className="v-thumb"
+            muted
+            playsInline
+            preload="metadata"
+          />
+        )}
+        {/* Drive dark cover */}
+        {video.isDrive && (
+          <div className="v-drive-cover">
+            <span className="drive-label eng-font">G Drive</span>
+          </div>
+        )}
+        {/* Play button overlay */}
+        <div className="v-overlay">
+          <div className="v-play-btn">
+            <Play size={26} fill="#fff" />
+          </div>
+        </div>
+      </div>
+      <div className="v-info">
+        <span className="v-title">{video.title}</span>
+        {video.isDrive && <span className="drive-badge eng-font">Drive</span>}
+      </div>
+    </button>
+  </motion.div>
+);
+
+/* ──────────────────────────────
+   Portfolio Section
+────────────────────────────── */
 const Portfolio = () => {
-  const [activeTab, setActiveTab] = useState('All');
-  const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab]   = useState('All');
+  const [videos, setVideos]         = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [activeVideo, setActiveVideo] = useState(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -100,6 +155,8 @@ const Portfolio = () => {
     };
     fetchVideos();
   }, []);
+
+  const closeModal = useCallback(() => setActiveVideo(null), []);
 
   const filtered = activeTab === 'All'
     ? videos
@@ -119,7 +176,7 @@ const Portfolio = () => {
         >
           <span className="section-eyebrow eng-font">Our Work</span>
           <h2 className="section-title">شوف شغلنا</h2>
-          <p className="section-sub">محتوى حقيقي أنتجناه لعملائنا</p>
+          <p className="section-sub">محتوى حقيقي أنتجناه لعملائنا — اضغط لمشاهدة أي فيديو</p>
         </motion.div>
 
         {/* Tabs */}
@@ -144,13 +201,22 @@ const Portfolio = () => {
           <div className="videos-grid">
             <AnimatePresence mode="popLayout">
               {filtered.map((video, idx) => (
-                <VideoCard key={video.id} video={video} idx={idx} />
+                <VideoCard
+                  key={video.id}
+                  video={video}
+                  idx={idx}
+                  onPlay={setActiveVideo}
+                />
               ))}
             </AnimatePresence>
           </div>
         )}
-
       </div>
+
+      {/* Modal */}
+      {activeVideo && (
+        <VideoModal video={activeVideo} onClose={closeModal} />
+      )}
     </section>
   );
 };
