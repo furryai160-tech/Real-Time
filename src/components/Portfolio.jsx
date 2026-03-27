@@ -3,51 +3,45 @@ import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, X } from 'lucide-react';
+import { detectPlatform, PLATFORM_META } from '../utils/videoUtils';
 import './Portfolio.css';
 
 const categories = ['All', 'Medical', 'Real Estate', 'Restaurants', 'Events', 'Ads'];
 
 const DEMO_VIDEOS = [
-  { id: 'demo1', title: 'إعلان عيادة أسنان', category: 'Medical', isDrive: false, url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-  { id: 'demo2', title: 'جولة في مطعم', category: 'Restaurants', isDrive: false, url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-  { id: 'demo3', title: 'عقارات فاخرة', category: 'Real Estate', isDrive: false, url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+  { id: 'demo1', title: 'إعلان عيادة أسنان', category: 'Medical', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+  { id: 'demo2', title: 'جولة في مطعم',     category: 'Restaurants', url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+  { id: 'demo3', title: 'عقارات فاخرة',     category: 'Real Estate', url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
 ];
 
-/* Extract FILE_ID and return preview URL */
-const getDrivePreviewUrl = (url) => {
-  const match = url.match(/\/d\/([\w-]+)\//);
-  if (match) return `https://drive.google.com/file/d/${match[1]}/preview`;
-  return url;
-};
-
-/* Google Drive thumbnail image (works publicly if file is shared) */
-const getDriveThumbnail = (url) => {
-  const match = url.match(/\/d\/([\w-]+)\//);
-  if (match) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w600`;
-  return null;
-};
-
-/* Video thumbnail using first frame */
-const VideoThumb = ({ src }) => {
-  const ref = React.useRef(null);
+/* ──────────────────────────────
+   Platform Cover Thumbnail
+────────────────────────────── */
+const PlatformCover = ({ platform, thumbUrl, title }) => {
+  const meta = PLATFORM_META[platform] || PLATFORM_META.unknown;
   return (
-    <video
-      ref={ref}
-      src={src}
-      className="v-thumb"
-      muted
-      playsInline
-      preload="metadata"
-      onLoadedMetadata={(e) => { e.target.currentTime = 0.5; }}
-    />
+    <div className="v-platform-cover" style={{ '--platform-color': meta.color }}>
+      {thumbUrl && (
+        <img
+          src={thumbUrl}
+          alt={title}
+          className="v-thumb"
+          onError={(e) => { e.target.style.display = 'none'; }}
+        />
+      )}
+      <div className="v-cover-overlay">
+        <div className="v-platform-badge eng-font">
+          {meta.emoji} {meta.label}
+        </div>
+      </div>
+    </div>
   );
 };
 
 /* ──────────────────────────────
-   Video Modal (fullscreen overlay)
+   Video Modal
 ────────────────────────────── */
-const VideoModal = ({ video, onClose }) => {
-  // Close on Escape key
+const VideoModal = ({ video, info, onClose }) => {
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -59,98 +53,86 @@ const VideoModal = ({ video, onClose }) => {
   }, [onClose]);
 
   return (
-    <AnimatePresence>
+    <motion.div
+      className="modal-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
       <motion.div
-        className="modal-backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
+        className="modal-player"
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <motion.div
-          className="modal-player"
-          initial={{ scale: 0.85, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.85, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Close button */}
-          <button className="modal-close" onClick={onClose}>
-            <X size={22} />
-          </button>
-
-          {/* Title */}
-          <div className="modal-title">{video.title}</div>
-
-          {/* Player */}
-          <div className="modal-media">
-            {video.isDrive ? (
-              <iframe
-                src={getDrivePreviewUrl(video.url)}
-                className="modal-iframe"
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                title={video.title}
-              />
-            ) : (
-              <video
-                src={video.url}
-                className="modal-video"
-                autoPlay
-                controls
-                playsInline
-              />
-            )}
-          </div>
-        </motion.div>
+        <button className="modal-close" onClick={onClose}><X size={20} /></button>
+        <div className="modal-title">{video.title}</div>
+        <div className="modal-media">
+          {info.isIframe ? (
+            <iframe
+              src={info.embedUrl}
+              className="modal-iframe"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowFullScreen
+              title={video.title}
+            />
+          ) : (
+            <video
+              src={info.embedUrl}
+              className="modal-video"
+              autoPlay controls playsInline
+            />
+          )}
+        </div>
       </motion.div>
-    </AnimatePresence>
+    </motion.div>
   );
 };
 
 /* ──────────────────────────────
-   Video Card (thumbnail)
+   Video Card
 ────────────────────────────── */
-const VideoCard = ({ video, idx, onPlay }) => (
-  <motion.div
-    className="v-card"
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, scale: 0.9 }}
-    transition={{ delay: idx * 0.07, duration: 0.4 }}
-    whileHover={{ y: -5 }}
-  >
-    <button className="v-card-btn" onClick={() => onPlay(video)}>
-      <div className="v-media-wrap">
-        {/* Thumbnail layer */}
-        {video.isDrive ? (
-          /* Drive thumbnail via Google API */
-          <img
-            src={getDriveThumbnail(video.url)}
-            alt={video.title}
-            className="v-thumb"
-            onError={(e) => { e.target.style.display = 'none'; }}
-          />
-        ) : (
-          /* MP4 first frame */
-          <VideoThumb src={video.url} />
-        )}
+const VideoCard = ({ video, idx, onPlay }) => {
+  const info = detectPlatform(video.url);
+  const meta = PLATFORM_META[info.platform] || PLATFORM_META.unknown;
 
-        {/* Play button overlay (shows on hover) */}
-        <div className="v-overlay">
-          <div className="v-play-btn">
-            <Play size={26} fill="#fff" />
+  return (
+    <motion.div
+      className="v-card"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ delay: idx * 0.07, duration: 0.4 }}
+      whileHover={{ y: -5 }}
+    >
+      <button className="v-card-btn" onClick={() => onPlay(video, info)}>
+        <div className="v-media-wrap">
+          <PlatformCover
+            platform={info.platform}
+            thumbUrl={info.thumbUrl}
+            title={video.title}
+          />
+          {/* Play button */}
+          <div className="v-overlay">
+            <div className="v-play-btn"><Play size={26} fill="#fff" /></div>
           </div>
         </div>
-      </div>
-      <div className="v-info">
-        <span className="v-title">{video.title}</span>
-        {video.isDrive && <span className="drive-badge eng-font">Drive</span>}
-      </div>
-    </button>
-  </motion.div>
-);
+        <div className="v-info">
+          <span className="v-title">{video.title}</span>
+          <span
+            className="v-platform-tag eng-font"
+            style={{ color: meta.color }}
+          >
+            {meta.emoji} {meta.label}
+          </span>
+        </div>
+      </button>
+    </motion.div>
+  );
+};
 
 /* ──────────────────────────────
    Portfolio Section
@@ -160,6 +142,7 @@ const Portfolio = () => {
   const [videos, setVideos]         = useState([]);
   const [loading, setLoading]       = useState(true);
   const [activeVideo, setActiveVideo] = useState(null);
+  const [activeInfo, setActiveInfo]   = useState(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -177,7 +160,15 @@ const Portfolio = () => {
     fetchVideos();
   }, []);
 
-  const closeModal = useCallback(() => setActiveVideo(null), []);
+  const handlePlay = useCallback((video, info) => {
+    setActiveVideo(video);
+    setActiveInfo(info);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setActiveVideo(null);
+    setActiveInfo(null);
+  }, []);
 
   const filtered = activeTab === 'All'
     ? videos
@@ -187,7 +178,6 @@ const Portfolio = () => {
     <section className="portfolio-section" id="portfolio">
       <div className="container">
 
-        {/* Header */}
         <motion.div
           className="section-header"
           initial={{ opacity: 0, y: 20 }}
@@ -197,10 +187,9 @@ const Portfolio = () => {
         >
           <span className="section-eyebrow eng-font">Our Work</span>
           <h2 className="section-title">شوف شغلنا</h2>
-          <p className="section-sub">محتوى حقيقي أنتجناه لعملائنا — اضغط لمشاهدة أي فيديو</p>
+          <p className="section-sub">اضغط على أي فيديو لمشاهدته — YouTube، TikTok، Drive، وأكتر</p>
         </motion.div>
 
-        {/* Tabs */}
         <div className="tabs-container">
           {categories.map(cat => (
             <button
@@ -213,7 +202,6 @@ const Portfolio = () => {
           ))}
         </div>
 
-        {/* Grid */}
         {loading ? (
           <div className="loading-state">جاري التحميل...</div>
         ) : filtered.length === 0 ? (
@@ -222,22 +210,18 @@ const Portfolio = () => {
           <div className="videos-grid">
             <AnimatePresence mode="popLayout">
               {filtered.map((video, idx) => (
-                <VideoCard
-                  key={video.id}
-                  video={video}
-                  idx={idx}
-                  onPlay={setActiveVideo}
-                />
+                <VideoCard key={video.id} video={video} idx={idx} onPlay={handlePlay} />
               ))}
             </AnimatePresence>
           </div>
         )}
       </div>
 
-      {/* Modal */}
-      {activeVideo && (
-        <VideoModal video={activeVideo} onClose={closeModal} />
-      )}
+      <AnimatePresence>
+        {activeVideo && (
+          <VideoModal video={activeVideo} info={activeInfo} onClose={closeModal} />
+        )}
+      </AnimatePresence>
     </section>
   );
 };

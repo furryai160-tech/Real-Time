@@ -6,18 +6,14 @@ import { db } from '../firebase';
 import { FaWhatsapp, FaInstagram, FaTiktok, FaFacebookF, FaYoutube } from 'react-icons/fa';
 import { LogOut, Film, Trash2, Plus, LayoutDashboard, Video, AlertCircle } from 'lucide-react';
 import './Dashboard.css';
+import { detectPlatform, PLATFORM_META } from '../utils/videoUtils';
 
-/* ─── Google Drive helper ─── */
-// Accepts share link like: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
-// Returns embed URL:        https://drive.google.com/file/d/FILE_ID/preview
+/* ─── Google Drive helper (kept for backward compat) ─── */
 const DRIVE_REGEX = /drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/;
 
 export function convertDriveLink(input) {
-  const match = input.match(DRIVE_REGEX);
-  if (match) {
-    return { embed: `https://drive.google.com/file/d/${match[1]}/preview`, isDrive: true };
-  }
-  return { embed: input, isDrive: false };
+  const info = detectPlatform(input);
+  return { embed: info.embedUrl, isDrive: info.platform === 'drive' };
 }
 
 export function isDriveUrl(url = '') {
@@ -96,14 +92,19 @@ const Dashboard = () => {
   // Form state
   const [title, setTitle]         = useState('');
   const [url, setUrl]             = useState('');
-  const [isDrive, setIsDrive]     = useState(false);
+  const [detectedPlatform, setDetectedPlatform] = useState(null);
   const [category, setCategory]   = useState(CATEGORIES[0]);
   const [platforms, setPlatforms] = useState([]);
 
   const handleUrlChange = (e) => {
     const val = e.target.value;
     setUrl(val);
-    setIsDrive(DRIVE_REGEX.test(val));
+    if (val.trim()) {
+      const { platform } = detectPlatform(val);
+      setDetectedPlatform(platform !== 'unknown' ? platform : null);
+    } else {
+      setDetectedPlatform(null);
+    }
   };
 
   // Data state
@@ -152,17 +153,18 @@ const Dashboard = () => {
     if (!title.trim() || !url.trim()) return notify('error', 'الرجاء ملء العنوان والرابط');
     setSaving(true);
     try {
-      const { embed, isDrive: driveFlag } = convertDriveLink(url);
+      const info = detectPlatform(url);
       await addDoc(collection(db, 'videos'), {
         title,
-        url: embed,          // store the embed-ready URL
-        originalUrl: url,    // keep the original for reference
-        isDrive: driveFlag,
+        url: info.embedUrl,
+        originalUrl: url,
+        isDrive: info.platform === 'drive',
+        platform: info.platform,
         category,
         platforms,
         createdAt: serverTimestamp()
       });
-      setTitle(''); setUrl(''); setPlatforms([]); setIsDrive(false);
+      setTitle(''); setUrl(''); setPlatforms([]); setDetectedPlatform(null);
       await fetchVideos();
       notify('success', 'تم رفع الفيديو بنجاح ✓');
     } catch (e) {
@@ -268,17 +270,21 @@ const Dashboard = () => {
             <div className="form-group">
               <div className="url-label-row">
                 <label>رابط الفيديو</label>
-                {isDrive && <span className="drive-detected">✅ Google Drive تم اكتشافه</span>}
+                {detectedPlatform && (
+                  <span className="drive-detected">
+                    {PLATFORM_META[detectedPlatform]?.emoji} {PLATFORM_META[detectedPlatform]?.label} — تم الاكتشاف ✓
+                  </span>
+                )}
               </div>
               <input
                 type="text"
                 value={url}
                 onChange={handleUrlChange}
-                placeholder="رابط مباشر أو رابط Google Drive (share link)"
+                placeholder="YouTube / TikTok / Instagram / Drive / رابط MP4 مباشر..."
                 className="eng-font"
               />
               <span className="url-hint eng-font">
-                📎 يمكنك لصق رابط مشاركة Drive مباشرة — هيتحوّل تلقائياً
+                📎 يمكنك لصق رابط من أي منصة — هيتحوّل تلقائياً
               </span>
             </div>
 
