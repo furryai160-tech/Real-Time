@@ -13,6 +13,13 @@ const DEMO_VIDEOS = [
   { id: 'demo3', title: 'عقارات فاخرة', category: 'Real Estate', isDrive: false, url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
 ];
 
+/* ── Extract Drive file ID to build watch URL ── */
+const getDriveWatchUrl = (embedUrl) => {
+  const match = embedUrl.match(/\/d\/([\w-]+)\//);
+  if (match) return `https://drive.google.com/file/d/${match[1]}/view`;
+  return embedUrl;
+};
+
 /* Click-to-play video card */
 const VideoCard = ({ video, idx }) => {
   const [playing, setPlaying] = useState(false);
@@ -27,22 +34,17 @@ const VideoCard = ({ video, idx }) => {
       transition={{ delay: idx * 0.07, duration: 0.4 }}
     >
       <div className="v-media-wrap">
-        {/* ── Drive iframe ── */}
+        {/* ── Drive → open in new tab ── */}
         {video.isDrive ? (
-          !playing ? (
-            <button className="v-cover v-cover--drive" onClick={() => setPlaying(true)}>
-              <div className="v-play-btn"><Play size={28} fill="#fff" /></div>
-              <span className="v-play-label">Drive — اضغط للتشغيل</span>
-            </button>
-          ) : (
-            <iframe
-              src={video.url + '&autoplay=1'}
-              className="v-iframe"
-              allow="autoplay; fullscreen"
-              allowFullScreen
-              title={video.title}
-            />
-          )
+          <a
+            href={getDriveWatchUrl(video.url)}
+            target="_blank"
+            rel="noreferrer"
+            className="v-cover v-cover--drive"
+          >
+            <div className="v-play-btn"><Play size={28} fill="#fff" /></div>
+            <span className="v-play-label">🎬 اضغط لمشاهدة الفيديو</span>
+          </a>
         ) : (
           /* ── Direct MP4 ── */
           !playing ? (
@@ -65,7 +67,12 @@ const VideoCard = ({ video, idx }) => {
       {/* Bottom info */}
       <div className="v-info">
         <span className="v-title">{video.title}</span>
-        <a href={video.isDrive ? video.url : video.url} target="_blank" rel="noreferrer" className="v-link">
+        <a
+          href={video.isDrive ? getDriveWatchUrl(video.url) : video.url}
+          target="_blank"
+          rel="noreferrer"
+          className="v-link"
+        >
           <ExternalLink size={14} />
         </a>
       </div>
