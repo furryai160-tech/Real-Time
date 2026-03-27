@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time Production | محتوى بيجيب عملاء</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Anti DevTools Protection -->
+  <script>
+    // 1. Disable right-click
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+    // 2. Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S
+    document.addEventListener('keydown', function(e) {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S'))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    });
+
+    // 3. Detect DevTools via debugger timing trick
+    (function devToolsDetect() {
+      var threshold = 160;
+      function check() {
+        var widthDiff  = window.outerWidth  - window.innerWidth  > threshold;
+        var heightDiff = window.outerHeight - window.innerHeight > threshold;
+        if (widthDiff || heightDiff) {
+          document.body.innerHTML = '';
+          window.location.replace('https://www.google.com');
+        }
+      }
+      setInterval(check, 1000);
+
+      // debugger trick
+      function trap() {
+        var start = new Date();
+        debugger;
+        var end = new Date();
+        if (end - start > 100) {
+          document.body.innerHTML = '';
+          window.location.replace('https://www.google.com');
+        }
+        setTimeout(trap, 1000);
+      }
+      trap();
+    })();
+  </script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

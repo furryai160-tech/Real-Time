@@ -1,0 +1,199 @@
+/* ─── Section ─── */
+.cta-section {
+  background: var(--black);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Card wrapper ─── */
+.cta-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 90px 48px;
+  border-radius: 28px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,106,0,0.18);
+  overflow: hidden;
+  gap: 28px;
+}
+
+/* ─── Glow orbs ─── */
+.cta-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.55;
+}
+
+.cta-orb--left {
+  width: 420px;
+  height: 420px;
+  background: rgba(255,106,0,0.18);
+  top: -120px;
+  left: -140px;
+}
+
+.cta-orb--right {
+  width: 340px;
+  height: 340px;
+  background: rgba(255,106,0,0.12);
+  bottom: -120px;
+  right: -100px;
+}
+
+/* ─── Badge ─── */
+.cta-badge {
+  display: inline-block;
+  background: rgba(255,106,0,0.1);
+  color: var(--orange);
+  border: 1px solid rgba(255,106,0,0.25);
+  border-radius: 50px;
+  padding: 7px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ─── Headline ─── */
+.cta-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.35;
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+}
+
+.cta-title-highlight {
+  background: linear-gradient(130deg, var(--white) 20%, var(--orange) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─── Sub text ─── */
+.cta-sub {
+  font-size: 1.15rem;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.7;
+  position: relative;
+  z-index: 2;
+}
+
+.cta-sub-small {
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.4);
+  display: block;
+  margin-top: 6px;
+}
+
+/* ─── WhatsApp button ─── */
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  background: #25d366;
+  color: #fff;
+  border-radius: 16px;
+  padding: 18px 36px;
+  text-decoration: none;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(37,211,102,0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.cta-btn:hover {
+  box-shadow: 0 14px 40px rgba(37,211,102,0.5);
+}
+
+.cta-btn-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cta-btn-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.cta-btn-main {
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cta-btn-hint {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.8;
+  line-height: 1;
+}
+
+/* ─── Trust row ─── */
+.cta-trust-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.45);
+  position: relative;
+  z-index: 2;
+}
+
+.trust-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,106,0,0.4);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .cta-wrapper {
+    padding: 60px 24px;
+    border-radius: 20px;
+    gap: 22px;
+  }
+
+  .cta-title {
+    font-size: 2.1rem;
+  }
+
+  .cta-btn {
+    padding: 16px 24px;
+    gap: 12px;
+  }
+
+  .cta-btn-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cta-trust-row {
+    gap: 10px;
+    font-size: 0.82rem;
+  }
+
+  .trust-dot {
+    display: none;
+  }
+}

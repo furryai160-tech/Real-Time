@@ -1,0 +1,165 @@
+/* ─── Section ─── */
+.social-proof-section {
+  background: #0e0e0e;
+  position: relative;
+  overflow: hidden;
+}
+
+.social-proof-section::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(255,106,0,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* ─── Grid ─── */
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Card ─── */
+.testimonial-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 36px 30px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.testimonial-card:hover {
+  border-color: rgba(255,106,0,0.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+/* Big decorative quote mark — top left */
+.quote-mark {
+  position: absolute;
+  top: 14px;
+  left: 22px;
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: rgba(255,106,0,0.12);
+  pointer-events: none;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.testimonial-card:hover .quote-mark {
+  color: rgba(255,106,0,0.22);
+}
+
+/* ─── Result badge ─── */
+.result-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  background: rgba(255,106,0,0.1);
+  color: var(--orange);
+  border: 1px solid rgba(255,106,0,0.25);
+  border-radius: 50px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: 28px; /* push below quote mark */
+}
+
+/* ─── Review text ─── */
+.review-text {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.8;
+  flex: 1;
+}
+
+/* ─── Stars ─── */
+.stars-row {
+  display: flex;
+  gap: 4px;
+}
+
+.star-svg {
+  width: 18px;
+  height: 18px;
+  color: var(--orange);
+}
+
+/* ─── Divider ─── */
+.client-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  width: 100%;
+}
+
+/* ─── Client row ─── */
+.client-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Avatar circle with initials */
+.client-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,106,0,0.7), rgba(255,140,60,0.5));
+  border: 1px solid rgba(255,106,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 1px;
+}
+
+.client-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.client-meta h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+}
+
+.client-meta span {
+  font-size: 0.82rem;
+  color: var(--text-gray);
+  line-height: 1.3;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 960px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .testimonials-grid {
+    max-width: 100%;
+  }
+}
