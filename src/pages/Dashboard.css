@@ -436,6 +436,72 @@
   background: rgba(255,0,0,0.2);
 }
 
+.delete-btn {
+  background: rgba(255, 80, 80, 0.08);
+  color: #ff6b6b;
+  border: 1px solid rgba(255,80,80,0.2);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.delete-btn:hover {
+  background: rgba(255,80,80,0.2);
+  border-color: rgba(255,80,80,0.5);
+}
+
+/* Inline confirm */
+.confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: fadeIn 0.2s ease;
+}
+
+.confirm-label {
+  font-size: 0.82rem;
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.confirm-yes {
+  background: rgba(255,80,80,0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255,80,80,0.4);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  transition: all 0.2s;
+}
+
+.confirm-yes:hover {
+  background: rgba(255,80,80,0.35);
+}
+
+.confirm-no {
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  transition: all 0.2s;
+}
+
+.confirm-no:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
 /* Drive badge in table */
 .drive-badge {
   display: inline-block;

@@ -114,6 +114,7 @@ const Dashboard = () => {
   const [saving, setSaving]     = useState(false);
   const [msg, setMsg]           = useState(null);   // { type:'success'|'error', text }
   const [activeTab, setActiveTab] = useState('all');
+  const [confirmId, setConfirmId]   = useState(null); // ID of row waiting for delete confirm
 
   /* fetch */
   const fetchVideos = async () => {
@@ -177,13 +178,14 @@ const Dashboard = () => {
 
   /* delete video */
   const handleDelete = async (id) => {
-    if (!window.confirm('متأكد من المسح؟')) return;
     try {
       await deleteDoc(doc(db, 'videos', id));
       setVideos(v => v.filter(x => x.id !== id));
-      notify('success', 'تم المسح ✓');
-    } catch {
-      notify('error', 'حصل خطأ');
+      setConfirmId(null);
+      notify('success', 'تم مسح الفيديو ✓');
+    } catch (err) {
+      console.error('Delete error:', err);
+      notify('error', `فشل المسح: ${err?.code || err?.message || 'خطأ غير معروف'}`);
     }
   };
 
@@ -383,9 +385,17 @@ const Dashboard = () => {
                     })}
                     {(!v.platforms || v.platforms.length === 0) && <span className="no-plat">—</span>}
                   </span>
-                  <button className="delete-btn" onClick={() => handleDelete(v.id)}>
-                    <Trash2 size={16} />
-                  </button>
+                  {confirmId === v.id ? (
+                    <span className="confirm-row">
+                      <span className="confirm-label">متأكد؟</span>
+                      <button className="confirm-yes" onClick={() => handleDelete(v.id)}>نعم</button>
+                      <button className="confirm-no"  onClick={() => setConfirmId(null)}>لا</button>
+                    </span>
+                  ) : (
+                    <button className="delete-btn" onClick={() => setConfirmId(v.id)}>
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
