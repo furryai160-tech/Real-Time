@@ -95,7 +95,7 @@ const Hero = () => {
           </motion.p>
 
           <motion.a
-            href="https://wa.me/201154626427"
+            href="https://wa.me/201015726742"
             target="_blank"
             rel="noreferrer"
             className="btn-primary hero-btn"
