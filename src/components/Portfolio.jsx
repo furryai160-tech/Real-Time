@@ -17,37 +17,68 @@ const DEMO_VIDEOS = [
 /* ──────────────────────────────
    Platform Cover Thumbnail
 ────────────────────────────── */
-const PlatformCover = ({ platform, thumbUrl, title }) => {
+/* Auto-fetch thumbnail for platforms that support oEmbed */
+const usePlatformThumb = (platform, thumbUrl, originalUrl) => {
+  const [thumb, setThumb] = useState(thumbUrl || null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // If we already have a thumbnail, use it
+    if (thumbUrl) { setThumb(thumbUrl); return; }
+
+    // TikTok oEmbed auto-fetch
+    if (platform === 'tiktok' && originalUrl) {
+      setLoading(true);
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(`https://www.tiktok.com/oembed?url=${originalUrl}`)}`;
+      fetch(proxyUrl)
+        .then(r => r.json())
+        .then(data => {
+          if (data?.thumbnail_url) setThumb(data.thumbnail_url);
+        })
+        .catch(() => {}) // Silently fail → show emoji fallback
+        .finally(() => setLoading(false));
+    }
+  }, [platform, thumbUrl, originalUrl]);
+
+  return { thumb, loading };
+};
+
+const PlatformCover = ({ platform, thumbUrl, title, originalUrl }) => {
   const meta = PLATFORM_META[platform] || PLATFORM_META.unknown;
+  const { thumb, loading } = usePlatformThumb(platform, thumbUrl, originalUrl);
+
   return (
     <div
       className="v-platform-cover"
       style={{
         '--platform-color': meta.color,
-        background: thumbUrl
+        background: thumb
           ? '#0d0d0d'
           : `linear-gradient(135deg, ${meta.color}22 0%, #0d0d0d 60%)`,
       }}
     >
-      {/* Real thumbnail image (YouTube / Drive) */}
-      {thumbUrl && (
+      {/* Loading shimmer */}
+      {loading && <div className="v-thumb-shimmer" />}
+
+      {/* Real thumbnail */}
+      {thumb && !loading && (
         <img
-          src={thumbUrl}
+          src={thumb}
           alt={title}
           className="v-thumb"
           onError={(e) => { e.target.style.display = 'none'; }}
         />
       )}
 
-      {/* Large emoji for platforms without thumbnail */}
-      {!thumbUrl && (
+      {/* Emoji fallback when no thumbnail */}
+      {!thumb && !loading && (
         <div className="v-no-thumb">
           <span className="v-no-thumb-emoji">{meta.emoji}</span>
           <span className="v-no-thumb-label eng-font">{meta.label}</span>
         </div>
       )}
 
-      {/* Platform badge top-right */}
+      {/* Platform badge */}
       <div className="v-cover-overlay">
         <div className="v-platform-badge eng-font">
           {meta.emoji} {meta.label}
@@ -137,6 +168,7 @@ const VideoCard = ({ video, idx, onPlay }) => {
             platform={info.platform}
             thumbUrl={thumbUrl}
             title={video.title}
+            originalUrl={video.originalUrl || video.url}
           />
           {/* Play button */}
           <div className="v-overlay">
