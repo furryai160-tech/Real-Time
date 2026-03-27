@@ -436,71 +436,7 @@
   background: rgba(255,0,0,0.2);
 }
 
-.delete-btn {
-  background: rgba(255, 80, 80, 0.08);
-  color: #ff6b6b;
-  border: 1px solid rgba(255,80,80,0.2);
-  border-radius: 8px;
-  padding: 8px 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-}
 
-.delete-btn:hover {
-  background: rgba(255,80,80,0.2);
-  border-color: rgba(255,80,80,0.5);
-}
-
-/* Inline confirm */
-.confirm-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  animation: fadeIn 0.2s ease;
-}
-
-.confirm-label {
-  font-size: 0.82rem;
-  color: #ff6b6b;
-  font-weight: 600;
-}
-
-.confirm-yes {
-  background: rgba(255,80,80,0.15);
-  color: #ff6b6b;
-  border: 1px solid rgba(255,80,80,0.4);
-  border-radius: 6px;
-  padding: 5px 12px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: 'Cairo', sans-serif;
-  transition: all 0.2s;
-}
-
-.confirm-yes:hover {
-  background: rgba(255,80,80,0.35);
-}
-
-.confirm-no {
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.5);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 6px;
-  padding: 5px 12px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: 'Cairo', sans-serif;
-  transition: all 0.2s;
-}
-
-.confirm-no:hover {
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-}
 
 /* Drive badge in table */
 .drive-badge {
@@ -659,7 +595,7 @@
 
 .table-head {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 60px;
+  grid-template-columns: 2fr 1fr 1fr auto;
   gap: 0;
   background: rgba(255,255,255,0.04);
   padding: 12px 18px;
@@ -672,12 +608,13 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 60px;
+  grid-template-columns: 2fr 1fr 1fr auto;
   gap: 0;
   align-items: center;
-  padding: 14px 18px;
+  padding: 12px 18px;
   border-top: 1px solid rgba(255,255,255,0.04);
   transition: background 0.2s;
+  min-height: 52px;
 }
 
 .table-row:hover {
@@ -718,11 +655,11 @@
   font-size: 1rem;
 }
 
-/* Delete */
+/* ── Delete & Confirm ── */
 .delete-btn {
   background: rgba(255,0,0,0.07);
   border: 1px solid rgba(255,0,0,0.15);
-  color: rgba(255,80,80,0.7);
+  color: rgba(255,80,80,0.8);
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -731,12 +668,73 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .delete-btn:hover {
-  background: rgba(255,0,0,0.15);
+  background: rgba(255,0,0,0.18);
   color: #ff4d4d;
-  border-color: rgba(255,0,0,0.35);
+  border-color: rgba(255,0,0,0.4);
+  transform: scale(1.05);
+}
+
+/* Inline confirm row */
+.confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  animation: fadeIn 0.18s ease;
+}
+
+.confirm-label {
+  font-size: 0.78rem;
+  color: #ff6b6b;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.confirm-yes {
+  background: rgba(255,60,60,0.15);
+  color: #ff5555;
+  border: 1px solid rgba(255,60,60,0.4);
+  border-radius: 7px;
+  padding: 6px 13px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.confirm-yes:hover {
+  background: rgba(255,60,60,0.3);
+  transform: scale(1.03);
+}
+
+.confirm-no {
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 7px;
+  padding: 6px 13px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.confirm-no:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 /* ── Responsive ── */
