@@ -8,11 +8,15 @@ const PATTERNS = {
     /youtube\.com\/watch\?v=([\w-]+)/,
     /youtu\.be\/([\w-]+)/,
     /youtube\.com\/shorts\/([\w-]+)/,
+    /youtube\.com\/embed\/([\w-]+)/,   // already-converted embed URL
   ],
   tiktok:    [/tiktok\.com\/@[\w.]+\/video\/(\d+)/],
   instagram: [/instagram\.com\/(p|reel|tv)\/([\w-]+)/],
   facebook:  [/facebook\.com\/.+\/videos?\/(\d+)/],
-  drive:     [/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/],
+  drive:     [
+    /drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/,
+    /drive\.google\.com\/file\/d\/([\w-]+)\/preview/,  // already-converted
+  ],
 };
 
 export function detectPlatform(url = '') {

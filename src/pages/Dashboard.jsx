@@ -160,6 +160,7 @@ const Dashboard = () => {
         originalUrl: url,
         isDrive: info.platform === 'drive',
         platform: info.platform,
+        thumbUrl: info.thumbUrl || null,   // ← save thumbnail URL
         category,
         platforms,
         createdAt: serverTimestamp()

@@ -20,7 +20,16 @@ const DEMO_VIDEOS = [
 const PlatformCover = ({ platform, thumbUrl, title }) => {
   const meta = PLATFORM_META[platform] || PLATFORM_META.unknown;
   return (
-    <div className="v-platform-cover" style={{ '--platform-color': meta.color }}>
+    <div
+      className="v-platform-cover"
+      style={{
+        '--platform-color': meta.color,
+        background: thumbUrl
+          ? '#0d0d0d'
+          : `linear-gradient(135deg, ${meta.color}22 0%, #0d0d0d 60%)`,
+      }}
+    >
+      {/* Real thumbnail image (YouTube / Drive) */}
       {thumbUrl && (
         <img
           src={thumbUrl}
@@ -29,6 +38,16 @@ const PlatformCover = ({ platform, thumbUrl, title }) => {
           onError={(e) => { e.target.style.display = 'none'; }}
         />
       )}
+
+      {/* Large emoji for platforms without thumbnail */}
+      {!thumbUrl && (
+        <div className="v-no-thumb">
+          <span className="v-no-thumb-emoji">{meta.emoji}</span>
+          <span className="v-no-thumb-label eng-font">{meta.label}</span>
+        </div>
+      )}
+
+      {/* Platform badge top-right */}
       <div className="v-cover-overlay">
         <div className="v-platform-badge eng-font">
           {meta.emoji} {meta.label}
@@ -96,8 +115,12 @@ const VideoModal = ({ video, info, onClose }) => {
    Video Card
 ────────────────────────────── */
 const VideoCard = ({ video, idx, onPlay }) => {
-  const info = detectPlatform(video.url);
+  // Use originalUrl for detection (has the video ID), fall back to stored url
+  const info = detectPlatform(video.originalUrl || video.url);
   const meta = PLATFORM_META[info.platform] || PLATFORM_META.unknown;
+
+  // For thumbnail: use stored thumbUrl if available, else detect it now
+  const thumbUrl = video.thumbUrl || info.thumbUrl;
 
   return (
     <motion.div
@@ -112,7 +135,7 @@ const VideoCard = ({ video, idx, onPlay }) => {
         <div className="v-media-wrap">
           <PlatformCover
             platform={info.platform}
-            thumbUrl={info.thumbUrl}
+            thumbUrl={thumbUrl}
             title={video.title}
           />
           {/* Play button */}

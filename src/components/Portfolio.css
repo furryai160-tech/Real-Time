@@ -353,6 +353,31 @@
   border-color: var(--platform-color, rgba(255,255,255,0.12));
 }
 
+/* No-thumbnail fallback: big emoji in center */
+.v-no-thumb {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.v-no-thumb-emoji {
+  font-size: 3.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
+}
+
+.v-no-thumb-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
 /* Platform tag in info bar */
 .v-platform-tag {
   font-size: 0.75rem;
